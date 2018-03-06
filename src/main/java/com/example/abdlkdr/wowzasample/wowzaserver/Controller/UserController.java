@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Controller
 public class UserController {
@@ -40,6 +42,11 @@ public class UserController {
     @ResponseBody
     public User getUserStatus (@RequestParam(value = "username")String username){
         return userService.getUserStatus(username);
+    }
+    @RequestMapping(method = RequestMethod.GET,value = "getAllUser")
+    @ResponseBody
+    public List<User> getAllUser (){
+        return userService.getAllUser();
     }
 
 }

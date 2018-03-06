@@ -5,6 +5,8 @@ import com.example.abdlkdr.wowzasample.wowzaserver.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -18,50 +20,58 @@ public class UserService {
         String uuid = UUID.randomUUID().toString();
         user.setId(uuid);
         user.setStatus("offline");
-        user.setUsername("melih");
+        user.setUsername("deneme");
         userRepository.save(user);
     }
 
     public String checkUserAvailable(String username) {
         User user = userRepository.getUserByUsername(username);
-        if (user.getStatus().contentEquals("online")){
+        if (user.getStatus().contentEquals("online")) {
             return "online";
-        }else {
+        } else {
             return "offline";
         }
     }
 
-    public String setUserStatus(String username){
+    public String setUserStatus(String username) {
         User user = userRepository.getUserByUsername(username);
-        if (user.getStatus().contentEquals("online")){
+        if (user.getStatus().contentEquals("online")) {
             user.setStatus("offline");
             userRepository.save(user);
             return "offline";
-        }else {
+        } else {
             user.setStatus("online");
             userRepository.save(user);
             return "online";
         }
     }
 
-    public String loginUser(String username){
-        User user= userRepository.getUserByUsername(username);
-        if (user!=null && !user.getUsername().isEmpty()  && user.getUsername().equals(username)){
-           return "ok";
-        }
-        else {
+    public String loginUser(String username) {
+        User user = userRepository.getUserByUsername(username);
+        if (user != null && !user.getUsername().isEmpty() && user.getUsername().equals(username)) {
+            return "ok";
+        } else {
             return "fail";
         }
     }
-    public User getUserStatus (String username){
+
+    public User getUserStatus(String username) {
         User user = userRepository.getUserByUsername(username);
-        if (user!= null && !user.getUsername().isEmpty() ){
+        if (user != null && !user.getUsername().isEmpty()) {
             return user;
-        }else {
-            user= new User();
+        } else {
+            user = new User();
             return user;
         }
     }
 
-
+    public List<User> getAllUser(){
+        List<User> userList = userRepository.findAll();
+        if (userList!=null){
+            return userList;
+        }else {
+            userList= new ArrayList<>();
+            return userList;
+        }
+    }
 }
