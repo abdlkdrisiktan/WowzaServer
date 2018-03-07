@@ -22,7 +22,6 @@ public class RequestLiveChat {
     public RequestLiveChat() {
     }
 
-
     public RequestLiveChat(String id, User user, User toUser, String status, String liveChatUrl, boolean isAccepted) {
         this.id = id;
         this.user = user;
@@ -72,11 +71,11 @@ public class RequestLiveChat {
         this.liveChatUrl = liveChatUrl;
     }
 
-    public boolean getIsAccepted() {
+    public boolean isAccepted() {
         return isAccepted;
     }
 
-    public void setIsAccepted(boolean isAccepted) {
-        this.isAccepted = isAccepted;
+    public void setAccepted(boolean accepted) {
+        isAccepted = accepted;
     }
 }

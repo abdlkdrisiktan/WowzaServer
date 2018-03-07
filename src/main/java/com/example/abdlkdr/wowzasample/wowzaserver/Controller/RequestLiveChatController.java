@@ -3,30 +3,38 @@ package com.example.abdlkdr.wowzasample.wowzaserver.Controller;
 import com.example.abdlkdr.wowzasample.wowzaserver.Model.RequestLiveChat;
 import com.example.abdlkdr.wowzasample.wowzaserver.Service.RequestLiveChatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Controller
 public class RequestLiveChatController {
 
     @Autowired
     RequestLiveChatService requestLiveChatService;
 
 
-    @RequestMapping(method = RequestMethod.GET,value = "isAccepted")
+    @GetMapping(value = "createRequestLiveChat")
     @ResponseBody
-    public RequestLiveChat createRequestLiveChat (@RequestParam(value = "user") String user, @RequestParam(value = "toUser") String toUser){
-        return requestLiveChatService.createRequestLiveChat(user, toUser);
+    public RequestLiveChat createRequestLiveChat (@RequestParam(value = "user") String user){
+        return requestLiveChatService.createRequestLiveChat(user);
     }
 
-    @RequestMapping(method = RequestMethod.GET,value = "changeRequesLiveChatStatus")
+    @GetMapping(value = "changeRequestLiveChatStatus")
     @ResponseBody
     public void changeRequestLiveChatStatus(@RequestParam(value = "user") String user,@RequestParam(value = "toUser")String toUser){
         requestLiveChatService.changeRequestLiveChatStatus(user, toUser);
     }
 
-    @RequestMapping(method = RequestMethod.GET,value = "checkRequestIsExist")
+    @GetMapping(value = "checkRequestIsExist")
     @ResponseBody
-    public void checkRequestIsExist (@RequestParam(value = "toUser")String toUser,@RequestParam(value = "isAccepted")boolean isAccepted){
-        requestLiveChatService.checkRequestIsExist(toUser,isAccepted);
+    public String checkRequestIsExist (@RequestParam(value = "toUser")String toUser){
+       return requestLiveChatService.checkRequestIsExist(toUser);
     }
+    @GetMapping(value = "setAcceptedStatus")
+    @ResponseBody
+    public void setAcceptedStatus (@RequestParam(value = "toUser")String toUser,@RequestParam(value = "isAccepted")Boolean isAccepted){
+        requestLiveChatService.setAcceptedStatus(toUser,isAccepted);
+    }
+
 }
