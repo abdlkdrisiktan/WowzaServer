@@ -39,32 +39,38 @@ public class RequestLiveChatService {
         }
         System.out.println(toUser);
         RequestLiveChat requestLiveChat = requestLiveChatRepository.findByUserUsernameAndToUserUsername(user, toUser);
-        if (requestLiveChat == null && !toUser.equals(user)) {
+        User firstUser = userRepository.getUserByUsername(user);
+        User secondUser = userRepository.getUserByUsername(toUser);
+        if (requestLiveChat == null && !toUser.equals(user) && firstUser.getStatus().contentEquals("online") && secondUser.getStatus().contentEquals("online")) {
             requestLiveChat = new RequestLiveChat();
             String uuid = UUID.randomUUID().toString();
             System.out.println(uuid);
             requestLiveChat.setId(uuid);
-            User firstUser = userRepository.getUserByUsername(user);
-            if (firstUser != null && !firstUser.getUsername().isEmpty() && firstUser.getStatus().contentEquals("online") ) {
+            if (firstUser != null && !firstUser.getUsername().isEmpty() && firstUser.getStatus().contentEquals("online")) {
                 firstUser.setStatus("offline");
                 requestLiveChat.setUser(firstUser);
             }
-            User secondUser = userRepository.getUserByUsername(toUser);
             if (secondUser != null && !secondUser.getUsername().isEmpty() && secondUser.getStatus().contentEquals("online")) {
                 secondUser.setStatus("offline");
                 requestLiveChat.setToUser(secondUser);
             }
             //konuşma hala devam ediyor mu etmiyor mu diye
             requestLiveChat.setStatus("yes");
+            requestLiveChat.setAccepted(true);
             //is accepted ise kabul etti mi etmedimi diye
             //ilk menüden seçtiğinde false default olarak set edecektir daha sonra
             //chechreques is exit bakacak
             requestLiveChatRepository.save(requestLiveChat);
             return requestLiveChat;
         } else {
-            if (!toUser.equals(user) && requestLiveChat.getStatus().contentEquals("no") ) {
-                requestLiveChat.setStatus("yes");
-                requestLiveChatRepository.save(requestLiveChat);
+            System.out.println("username is     :   "+  user+   "   toUsername is   :   "+toUser);
+            if (!toUser.equals(user)  && firstUser.getStatus().contentEquals("online") && secondUser.getStatus().contentEquals("online")) {
+                if (requestLiveChat !=null && requestLiveChat.getStatus().contentEquals("no"))
+                {
+                    requestLiveChat.setStatus("yes");
+                    requestLiveChatRepository.save(requestLiveChat);
+                    return requestLiveChat;
+                }
             }
             return requestLiveChat;
         }
@@ -73,6 +79,7 @@ public class RequestLiveChatService {
     public void changeRequestLiveChatStatus(String user, String toUser) {
         RequestLiveChat requestLiveChat = requestLiveChatRepository.findByUserUsernameAndToUserUsername(user, toUser);
         if (requestLiveChat != null && requestLiveChat.getStatus().contentEquals("yes")) {
+            requestLiveChat.setAccepted(true);
             requestLiveChat.setStatus("no");
             User firstUser = userRepository.getUserByUsername(user);
             if (firstUser != null && firstUser.getStatus().contentEquals("offline")) {
@@ -89,7 +96,21 @@ public class RequestLiveChatService {
             System.out.println("change request live chat status line 69");
 //            isAccepted(user, toUser);
         }
+    }
 
+    //Alert dialog'da hayır basdığımızda isAccepted secenegini
+    public void changeAcceptedStatus(String toUser) {
+        RequestLiveChat requestLiveChat = requestLiveChatRepository.findByToUserUsername(toUser);
+        if (requestLiveChat != null) {
+            if (requestLiveChat.isAccepted()) {
+                requestLiveChat.setAccepted(false);
+                requestLiveChatRepository.save(requestLiveChat);
+            } else {
+                requestLiveChat.setAccepted(true);
+                requestLiveChatRepository.save(requestLiveChat);
+            }
+
+        }
 
     }
 
@@ -98,12 +119,29 @@ public class RequestLiveChatService {
         //burada accepted booelan kontrol edersek devamlı ıstek gondermez
         //alert dialogda hayır dusuna basarsa o zaman bu metodun içerisinde girmez veya 4
         //alert dialog 'da hayır basınca o isteği silecek bir metot oluşturabiliriz böylece isteğin gelip gelmediğine de tekrardan bakabiliriz
-        //
         RequestLiveChat requestLiveChat = requestLiveChatRepository.findByToUserUsername(toUser);
-        if (requestLiveChat != null) {
-            return "yes";
+        if (requestLiveChat != null && requestLiveChat.getStatus().contentEquals("yes")) {
+            if (!requestLiveChat.isAccepted()){
+                return "no";
+            }else {
+                return "yes";
+            }
         } else {
-            return "no";
+            return "null";
+        }
+    }
+
+    public RequestLiveChat getRequest(String toUser){
+        RequestLiveChat requestLiveChat = requestLiveChatRepository.findByToUserUsername(toUser);
+        if (requestLiveChat != null && requestLiveChat.getStatus().contentEquals("yes")){
+            if (requestLiveChat.isAccepted()){
+                return requestLiveChat;
+            }else {
+                return null;
+            }
+        }else {
+            requestLiveChat= new RequestLiveChat();
+            return requestLiveChat;
         }
     }
 
@@ -125,5 +163,6 @@ public class RequestLiveChatService {
             }
         }
     }
+
 
 }

@@ -36,5 +36,15 @@ public class RequestLiveChatController {
     public void setAcceptedStatus (@RequestParam(value = "toUser")String toUser,@RequestParam(value = "isAccepted")Boolean isAccepted){
         requestLiveChatService.setAcceptedStatus(toUser,isAccepted);
     }
+    @GetMapping(value = "changeAcceptedStatus")
+    @ResponseBody
+    public void changeAcceptedStatus (@RequestParam(value = "toUser")String toUser){
+        requestLiveChatService.changeAcceptedStatus(toUser);
+    }
+    @GetMapping(value = "getRequest")
+    @ResponseBody
+    public RequestLiveChat getRequest (@RequestParam(value = "toUser")String toUser){
+        return requestLiveChatService.getRequest(toUser);
+    }
 
 }
