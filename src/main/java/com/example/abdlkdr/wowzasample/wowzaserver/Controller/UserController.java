@@ -29,8 +29,8 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.GET,value = "setUserStatus")
     @ResponseBody
-    public String setUserStatus(@RequestParam(value = "username")String username){
-        return userService.setUserStatus(username);
+    public String setUserStatus(@RequestParam(value = "username")String username,@RequestParam(value = "status")String status){
+        return userService.setUserStatus(username,status);
     }
 
     @RequestMapping(method = RequestMethod.GET,value = "loginUser")

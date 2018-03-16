@@ -13,4 +13,6 @@ public interface RequestLiveChatRepository extends MongoRepository<RequestLiveCh
 
     RequestLiveChat findByUserAndToUser (String user, String toUser);
 
+    RequestLiveChat findByUserUsername(String user);
+
 }

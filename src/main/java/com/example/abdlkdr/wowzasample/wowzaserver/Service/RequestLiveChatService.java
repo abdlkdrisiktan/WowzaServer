@@ -7,11 +7,11 @@ import com.example.abdlkdr.wowzasample.wowzaserver.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+@SuppressWarnings("Duplicates")
 @Service
 public class RequestLiveChatService {
 
@@ -22,12 +22,12 @@ public class RequestLiveChatService {
     @Autowired
     UserRepository userRepository;
 
-
-    //Client tarafından gelecek iki tane user ismi ile request modelini oluşturacağız
-    //verileri set ediyoruz
-    //is accepted false olarak ayarlıyoruz ki
-    //karşı tarafa bilgi gidene kadar konuşmayı başlatmayalım
-    //eğer true olursa checkrequestısexıst ıcersine girecek
+    //------------------------------------------------------------//
+    //Kullanıcı client tarafında konuşma başlaktmak istediğinde   //
+    //İstek buraya düşüyor ve random kişilerler match ediyor      //
+    //İsteğin olup olmadığına bakıyor daha sonrasından ona göre   //
+    //Yeni bir istek oluşturup gerekli elemanları set ediyor      //
+    //------------------------------------------------------------//
     public RequestLiveChat createRequestLiveChat(String user) {
         List<User> list = userRepository.findAll();
         String toUser = "";
@@ -47,16 +47,16 @@ public class RequestLiveChatService {
             System.out.println(uuid);
             requestLiveChat.setId(uuid);
             if (firstUser != null && !firstUser.getUsername().isEmpty() && firstUser.getStatus().contentEquals("online")) {
-                firstUser.setStatus("offline");
+//                firstUser.setStatus("offline");
                 requestLiveChat.setUser(firstUser);
             }
             if (secondUser != null && !secondUser.getUsername().isEmpty() && secondUser.getStatus().contentEquals("online")) {
-                secondUser.setStatus("offline");
+//                secondUser.setStatus("offline");
                 requestLiveChat.setToUser(secondUser);
             }
             //konuşma hala devam ediyor mu etmiyor mu diye
             requestLiveChat.setStatus("yes");
-            requestLiveChat.setAccepted(true);
+            requestLiveChat.setAccepted(false);
             //is accepted ise kabul etti mi etmedimi diye
             //ilk menüden seçtiğinde false default olarak set edecektir daha sonra
             //chechreques is exit bakacak
@@ -99,41 +99,37 @@ public class RequestLiveChatService {
     }
 
     //Alert dialog'da hayır basdığımızda isAccepted secenegini
-    public void changeAcceptedStatus(String toUser) {
+    public void changeAcceptedStatus(String toUser,String acceptedStatus) {
         RequestLiveChat requestLiveChat = requestLiveChatRepository.findByToUserUsername(toUser);
         if (requestLiveChat != null) {
-            if (requestLiveChat.isAccepted()) {
-                requestLiveChat.setAccepted(false);
-                requestLiveChatRepository.save(requestLiveChat);
-            } else {
-                requestLiveChat.setAccepted(true);
-                requestLiveChatRepository.save(requestLiveChat);
-            }
-
+           if (acceptedStatus.contentEquals("true")){
+               requestLiveChat.setStatus("no");
+               requestLiveChat.setAccepted(true);
+               requestLiveChatRepository.save(requestLiveChat);
+           }else {
+               requestLiveChat.setStatus("yes");
+               requestLiveChat.setAccepted(false);
+               requestLiveChatRepository.save(requestLiveChat);
+           }
         }
 
     }
 
-    //Karşıdaki kullanıcıya request gelip gelmediğini kontrol etmek için
     public String checkRequestIsExist(String toUser) {
-        //burada accepted booelan kontrol edersek devamlı ıstek gondermez
-        //alert dialogda hayır dusuna basarsa o zaman bu metodun içerisinde girmez veya 4
-        //alert dialog 'da hayır basınca o isteği silecek bir metot oluşturabiliriz böylece isteğin gelip gelmediğine de tekrardan bakabiliriz
         RequestLiveChat requestLiveChat = requestLiveChatRepository.findByToUserUsername(toUser);
-        if (requestLiveChat != null && requestLiveChat.getStatus().contentEquals("yes")) {
-            if (!requestLiveChat.isAccepted()){
-                return "no";
-            }else {
-                return "yes";
-            }
+        System.out.println("checkRequestIsExist");
+        if (requestLiveChat != null && requestLiveChat.getStatus().contentEquals("yes") && requestLiveChat.getUser().getStatus().contentEquals("online") && requestLiveChat.getToUser().getStatus().contentEquals("online")) {
+            return "yes";
         } else {
-            return "null";
+            return "no";
         }
     }
 
     public RequestLiveChat getRequest(String toUser){
         RequestLiveChat requestLiveChat = requestLiveChatRepository.findByToUserUsername(toUser);
-        if (requestLiveChat != null && requestLiveChat.getStatus().contentEquals("yes")){
+        System.out.println("getResquest");
+        if (requestLiveChat != null && requestLiveChat.getStatus().contentEquals("yes") && requestLiveChat.getUser().getStatus().contentEquals("online") && requestLiveChat.getToUser().getStatus().contentEquals("online")){
+
             if (requestLiveChat.isAccepted()){
                 return requestLiveChat;
             }else {
@@ -142,6 +138,20 @@ public class RequestLiveChatService {
         }else {
             requestLiveChat= new RequestLiveChat();
             return requestLiveChat;
+        }
+    }
+
+    public RequestLiveChat getRequestForUser(String user){
+        RequestLiveChat request = requestLiveChatRepository.findByUserUsername(user);
+        if (request != null && request.getStatus().contentEquals("yes")){
+            if (request.isAccepted()){
+                return request;
+            }else {
+                return null;
+            }
+        }else {
+            request= new RequestLiveChat();
+            return request;
         }
     }
 
@@ -164,5 +174,13 @@ public class RequestLiveChatService {
         }
     }
 
+    public String getAcceptedStatus (String user){
+        RequestLiveChat requestLiveChat = requestLiveChatRepository.findByUserUsername(user);
+        if (requestLiveChat!=null && requestLiveChat.isAccepted()){
+            return "true";
+        }else {
+            return "false";
+        }
+    }
 
 }

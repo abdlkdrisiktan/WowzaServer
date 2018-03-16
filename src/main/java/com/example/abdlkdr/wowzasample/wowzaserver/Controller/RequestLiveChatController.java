@@ -38,13 +38,23 @@ public class RequestLiveChatController {
     }
     @GetMapping(value = "changeAcceptedStatus")
     @ResponseBody
-    public void changeAcceptedStatus (@RequestParam(value = "toUser")String toUser){
-        requestLiveChatService.changeAcceptedStatus(toUser);
+    public void changeAcceptedStatus (@RequestParam(value = "toUser")String toUser,@RequestParam(value = "acceptedStatus")String acceptedStatus){
+        requestLiveChatService.changeAcceptedStatus(toUser,acceptedStatus);
     }
     @GetMapping(value = "getRequest")
     @ResponseBody
     public RequestLiveChat getRequest (@RequestParam(value = "toUser")String toUser){
         return requestLiveChatService.getRequest(toUser);
+    }
+    @GetMapping(value = "getAcceptedStatus")
+    @ResponseBody
+    public String getAcceptedStatus (@RequestParam(value = "user")String user){
+        return requestLiveChatService.getAcceptedStatus(user);
+    }
+    @GetMapping(value = "getRequestForUser")
+    @ResponseBody
+    public RequestLiveChat getRequestForUser(@RequestParam(value = "user")String user){
+        return requestLiveChatService.getRequestForUser(user);
     }
 
 }

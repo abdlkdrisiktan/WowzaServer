@@ -15,15 +15,17 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
+    //++++++++++++++++++++++++++++++++++++++++//
     public void addNewUser() {
         User user = new User();
         String uuid = UUID.randomUUID().toString();
         user.setId(uuid);
         user.setStatus("offline");
-        user.setUsername("deneme");
+        user.setUsername("melih");
         userRepository.save(user);
     }
 
+    //----------------------------------------//
     public String checkUserAvailable(String username) {
         User user = userRepository.getUserByUsername(username);
         if (user.getStatus().contentEquals("online")) {
@@ -33,19 +35,18 @@ public class UserService {
         }
     }
 
-    public String setUserStatus(String username) {
+    //++++++++++++++++++++++++++++++++++++++++//
+    public String setUserStatus(String username,String status) {
         User user = userRepository.getUserByUsername(username);
-        if (user.getStatus().contentEquals("online")) {
-            user.setStatus("offline");
+        if (user!=null){
+            user.setStatus(status);
             userRepository.save(user);
-            return "offline";
-        } else {
-            user.setStatus("online");
-            userRepository.save(user);
-            return "online";
+            return user.getStatus();
         }
+        return null;
     }
 
+    //+++++++++++++++++++++++++++++++++++++++//
     public String loginUser(String username) {
         User user = userRepository.getUserByUsername(username);
         if (user != null && !user.getUsername().isEmpty() && user.getUsername().equals(username)) {
@@ -55,6 +56,7 @@ public class UserService {
         }
     }
 
+    //---------------------------------------//
     public User getUserStatus(String username) {
         User user = userRepository.getUserByUsername(username);
         if (user != null && !user.getUsername().isEmpty()) {
@@ -65,6 +67,7 @@ public class UserService {
         }
     }
 
+    //+++++++++++++++++++++++++++++++++++++++//
     public List<User> getAllUser(){
         List<User> userList = userRepository.findAll();
         if (userList!=null){
@@ -74,4 +77,5 @@ public class UserService {
             return userList;
         }
     }
+
 }
