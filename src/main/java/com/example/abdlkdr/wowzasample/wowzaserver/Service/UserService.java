@@ -20,8 +20,8 @@ public class UserService {
         User user = new User();
         String uuid = UUID.randomUUID().toString();
         user.setId(uuid);
-        user.setStatus("offline");
-        user.setUsername("melih");
+        user.setStatus("online");
+        user.setUsername("1");
         userRepository.save(user);
     }
 
@@ -68,11 +68,20 @@ public class UserService {
     }
 
     //+++++++++++++++++++++++++++++++++++++++//
-    public List<User> getAllUser(){
+    public List<User> getAllUser(String username){
         List<User> userList = userRepository.findAll();
+        List<User> tempList ;
         if (userList!=null){
-            return userList;
+            tempList=userList;
+            for (int i=0; i<tempList.size(); i++){
+                System.out.println("for içerisişi");
+                if (tempList.get(i).getUsername().contentEquals(username)){
+                    tempList.remove(i);
+                }
+            }
+            return tempList;
         }else {
+            System.out.println("else");
             userList= new ArrayList<>();
             return userList;
         }

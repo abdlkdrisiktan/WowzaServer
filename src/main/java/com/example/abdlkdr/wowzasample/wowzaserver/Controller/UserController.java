@@ -45,8 +45,8 @@ public class UserController {
     }
     @RequestMapping(method = RequestMethod.GET,value = "getAllUser")
     @ResponseBody
-    public List<User> getAllUser (){
-        return userService.getAllUser();
+    public List<User> getAllUser (@RequestParam(value = "username")String username){
+        return userService.getAllUser(username);
     }
 
 }

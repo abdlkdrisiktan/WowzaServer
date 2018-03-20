@@ -41,20 +41,30 @@ public class RequestLiveChatController {
     public void changeAcceptedStatus (@RequestParam(value = "toUser")String toUser,@RequestParam(value = "acceptedStatus")String acceptedStatus){
         requestLiveChatService.changeAcceptedStatus(toUser,acceptedStatus);
     }
-    @GetMapping(value = "getRequest")
-    @ResponseBody
-    public RequestLiveChat getRequest (@RequestParam(value = "toUser")String toUser){
-        return requestLiveChatService.getRequest(toUser);
-    }
+//    @GetMapping(value = "getRequest")
+//    @ResponseBody
+//    public RequestLiveChat getRequest (@RequestParam(value = "toUser")String toUser){
+//        return requestLiveChatService.getRequest(toUser);
+//    }
     @GetMapping(value = "getAcceptedStatus")
     @ResponseBody
     public String getAcceptedStatus (@RequestParam(value = "user")String user){
         return requestLiveChatService.getAcceptedStatus(user);
     }
-    @GetMapping(value = "getRequestForUser")
+//    @GetMapping(value = "getRequestForUser")
+//    @ResponseBody
+//    public RequestLiveChat getRequestForUser(@RequestParam(value = "user")String user){
+//        return requestLiveChatService.getRequestForUser(user);
+//    }
+    @GetMapping(value = "deleteRequestLiveChat")
     @ResponseBody
-    public RequestLiveChat getRequestForUser(@RequestParam(value = "user")String user){
-        return requestLiveChatService.getRequestForUser(user);
+    public void  deleteRequestLiveChat (@RequestParam(value = "username")String username){
+        requestLiveChatService.deleteRequestLiveChat(username);
+    }
+    @GetMapping(value = "getRequestData")
+    @ResponseBody
+    public RequestLiveChat getRequestData (@RequestParam(value = "username")String username){
+        return requestLiveChatService.getRequestData(username);
     }
 
 }

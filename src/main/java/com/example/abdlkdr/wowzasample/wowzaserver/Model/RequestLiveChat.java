@@ -3,6 +3,8 @@ package com.example.abdlkdr.wowzasample.wowzaserver.Model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
+
 @Document(collection = "RequestLiveChat")
 public class RequestLiveChat {
 
@@ -19,16 +21,27 @@ public class RequestLiveChat {
     //İsteği kabul edip etmediğini kontrol ediyoruz  //Yes or No
     private boolean isAccepted;
 
+    private Date date;
+
     public RequestLiveChat() {
     }
 
-    public RequestLiveChat(String id, User user, User toUser, String status, String liveChatUrl, boolean isAccepted) {
+    public RequestLiveChat(String id, User user, User toUser, String status, String liveChatUrl, boolean isAccepted,Date date) {
         this.id = id;
         this.user = user;
         this.toUser = toUser;
         this.status = status;
         this.liveChatUrl = liveChatUrl;
         this.isAccepted = isAccepted;
+        this.date=date;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public String getId() {

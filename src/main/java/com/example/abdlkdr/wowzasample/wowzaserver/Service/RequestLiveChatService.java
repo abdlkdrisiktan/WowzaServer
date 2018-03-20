@@ -1,15 +1,16 @@
 package com.example.abdlkdr.wowzasample.wowzaserver.Service;
 
+import com.example.abdlkdr.wowzasample.wowzaserver.Model.DataRequestLiveChat;
 import com.example.abdlkdr.wowzasample.wowzaserver.Model.RequestLiveChat;
 import com.example.abdlkdr.wowzasample.wowzaserver.Model.User;
+import com.example.abdlkdr.wowzasample.wowzaserver.Repository.DataRequestLiveChatRepository;
 import com.example.abdlkdr.wowzasample.wowzaserver.Repository.RequestLiveChatRepository;
 import com.example.abdlkdr.wowzasample.wowzaserver.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @SuppressWarnings("Duplicates")
 @Service
@@ -22,6 +23,9 @@ public class RequestLiveChatService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    DataRequestLiveChatRepository dataRequestLiveChatRepository;
+
     //------------------------------------------------------------//
     //Kullanıcı client tarafında konuşma başlaktmak istediğinde   //
     //İstek buraya düşüyor ve random kişilerler match ediyor      //
@@ -30,50 +34,64 @@ public class RequestLiveChatService {
     //------------------------------------------------------------//
     public RequestLiveChat createRequestLiveChat(String user) {
         List<User> list = userRepository.findAll();
-        String toUser = "";
-        Random rand = new Random();
-        int n = rand.nextInt(list.size());
-        toUser = list.get(n).getUsername();
-        if (toUser.equals(user)) {
-            createRequestLiveChat(user);
-        }
-        System.out.println(toUser);
-        RequestLiveChat requestLiveChat = requestLiveChatRepository.findByUserUsernameAndToUserUsername(user, toUser);
-        User firstUser = userRepository.getUserByUsername(user);
-        User secondUser = userRepository.getUserByUsername(toUser);
-        if (requestLiveChat == null && !toUser.equals(user) && firstUser.getStatus().contentEquals("online") && secondUser.getStatus().contentEquals("online")) {
-            requestLiveChat = new RequestLiveChat();
-            String uuid = UUID.randomUUID().toString();
-            System.out.println(uuid);
-            requestLiveChat.setId(uuid);
-            if (firstUser != null && !firstUser.getUsername().isEmpty() && firstUser.getStatus().contentEquals("online")) {
-//                firstUser.setStatus("offline");
-                requestLiveChat.setUser(firstUser);
-            }
-            if (secondUser != null && !secondUser.getUsername().isEmpty() && secondUser.getStatus().contentEquals("online")) {
-//                secondUser.setStatus("offline");
-                requestLiveChat.setToUser(secondUser);
-            }
-            //konuşma hala devam ediyor mu etmiyor mu diye
-            requestLiveChat.setStatus("yes");
-            requestLiveChat.setAccepted(false);
-            //is accepted ise kabul etti mi etmedimi diye
-            //ilk menüden seçtiğinde false default olarak set edecektir daha sonra
-            //chechreques is exit bakacak
-            requestLiveChatRepository.save(requestLiveChat);
-            return requestLiveChat;
-        } else {
-            System.out.println("username is     :   "+  user+   "   toUsername is   :   "+toUser);
-            if (!toUser.equals(user)  && firstUser.getStatus().contentEquals("online") && secondUser.getStatus().contentEquals("online")) {
-                if (requestLiveChat !=null && requestLiveChat.getStatus().contentEquals("no"))
-                {
-                    requestLiveChat.setStatus("yes");
-                    requestLiveChatRepository.save(requestLiveChat);
-                    return requestLiveChat;
+        List<User> tempList ;
+        for (int i=0; i<list.size(); i++){
+            if (list.get(i).getStatus().contentEquals("online")){
+                if (list.get(i).getUsername().contentEquals(user)){
+                    list.remove(i);
                 }
             }
-            return requestLiveChat;
+            if (list.get(i).getStatus().contentEquals("offline")){
+                list.remove(i);
+            }
         }
+        tempList=list;
+        for (int i =0; i<tempList.size();i++){
+            System.out.println(tempList.get(i).getUsername()+"  "+tempList.get(i).getStatus());
+        }
+        String toUser = "";
+        Random rand = new Random();
+        int n = rand.nextInt(tempList.size());
+        toUser=tempList.get(n).getUsername();
+        DataRequestLiveChat dataRequestLiveChat = new DataRequestLiveChat();
+        User firstUser = userRepository.getUserByUsername(user);
+        User secondUser = userRepository.getUserByUsername(toUser);
+        if ( firstUser.getStatus().contentEquals("online") && secondUser.getStatus().contentEquals("online") ) {
+            RequestLiveChat requestLiveChat = requestLiveChatRepository.findByUserUsernameAndToUserUsername(user, toUser);
+            if (requestLiveChat == null){
+                requestLiveChat = new RequestLiveChat();
+                String uuid = UUID.randomUUID().toString();
+                System.out.println(uuid);
+                requestLiveChat.setId(uuid);
+                dataRequestLiveChat.setId(uuid);
+                if (firstUser != null && !firstUser.getUsername().isEmpty() && firstUser.getStatus().contentEquals("online")) {
+                    requestLiveChat.setUser(firstUser);
+                    dataRequestLiveChat.setUser(firstUser);
+                }
+                if (secondUser != null && !secondUser.getUsername().isEmpty() && secondUser.getStatus().contentEquals("online")) {
+                    requestLiveChat.setToUser(secondUser);
+                    dataRequestLiveChat.setToUser(secondUser);
+                }
+                requestLiveChat.setStatus("yes");
+                requestLiveChat.setAccepted(false);
+                requestLiveChat.setDate(Calendar.getInstance().getTime());
+                dataRequestLiveChat.setDate(Calendar.getInstance().getTime());
+                dataRequestLiveChatRepository.save(dataRequestLiveChat);
+                requestLiveChatRepository.save(requestLiveChat);
+                return requestLiveChat;
+            }else {
+                if (!toUser.equals(user)  && firstUser.getStatus().contentEquals("online") && secondUser.getStatus().contentEquals("online")) {
+                    if (requestLiveChat !=null && requestLiveChat.getStatus().contentEquals("no"))
+                    {
+                        requestLiveChat.setStatus("yes");
+                        requestLiveChatRepository.save(requestLiveChat);
+                        return requestLiveChat;
+                    }
+                }
+                return requestLiveChat;
+            }
+        }
+        return new RequestLiveChat();
     }
 
     public void changeRequestLiveChatStatus(String user, String toUser) {
@@ -93,7 +111,6 @@ public class RequestLiveChatService {
             }
             requestLiveChatRepository.save(requestLiveChat);
         } else {
-            System.out.println("change request live chat status line 69");
 //            isAccepted(user, toUser);
         }
     }
@@ -125,35 +142,34 @@ public class RequestLiveChatService {
         }
     }
 
-    public RequestLiveChat getRequest(String toUser){
-        RequestLiveChat requestLiveChat = requestLiveChatRepository.findByToUserUsername(toUser);
-        System.out.println("getResquest");
-        if (requestLiveChat != null && requestLiveChat.getStatus().contentEquals("yes") && requestLiveChat.getUser().getStatus().contentEquals("online") && requestLiveChat.getToUser().getStatus().contentEquals("online")){
+//    public RequestLiveChat getRequest(String toUser){
+//        RequestLiveChat requestLiveChat = requestLiveChatRepository.findByToUserUsername(toUser);
+//        if (requestLiveChat != null && requestLiveChat.getUser().getStatus().contentEquals("online") && requestLiveChat.getToUser().getStatus().contentEquals("online")){
+//
+//            if (requestLiveChat.isAccepted()){
+//                return requestLiveChat;
+//            }else {
+//                return null;
+//            }
+//        }else {
+//            requestLiveChat= new RequestLiveChat();
+//            return requestLiveChat;
+//        }
+//    }
 
-            if (requestLiveChat.isAccepted()){
-                return requestLiveChat;
-            }else {
-                return null;
-            }
-        }else {
-            requestLiveChat= new RequestLiveChat();
-            return requestLiveChat;
-        }
-    }
-
-    public RequestLiveChat getRequestForUser(String user){
-        RequestLiveChat request = requestLiveChatRepository.findByUserUsername(user);
-        if (request != null && request.getStatus().contentEquals("yes")){
-            if (request.isAccepted()){
-                return request;
-            }else {
-                return null;
-            }
-        }else {
-            request= new RequestLiveChat();
-            return request;
-        }
-    }
+//    public RequestLiveChat getRequestForUser(String user){
+//        RequestLiveChat request = requestLiveChatRepository.findByUserUsername(user);
+//        if (request != null && request.getStatus().contentEquals("yes")){
+//            if (request.isAccepted()){
+//                return request;
+//            }else {
+//                return null;
+//            }
+//        }else {
+//            request= new RequestLiveChat();
+//            return request;
+//        }
+//    }
 
     //Request kontrol edildikten sonra konuşma kabul edip etmediğini değiştirecek
     public void setAcceptedStatus(String toUser, boolean isAccepted) {
@@ -180,6 +196,32 @@ public class RequestLiveChatService {
             return "true";
         }else {
             return "false";
+        }
+    }
+
+    public void deleteRequestLiveChat(String username){
+        RequestLiveChat user = requestLiveChatRepository.findByUserUsername(username);
+        RequestLiveChat toUser = requestLiveChatRepository.findByToUserUsername(username);
+        if (user !=null ){
+            requestLiveChatRepository.delete(user);
+        }
+       else {
+            if(toUser!=null){
+                requestLiveChatRepository.delete(toUser);
+            }
+        }
+    }
+
+    public RequestLiveChat getRequestData(String username){
+        RequestLiveChat user = requestLiveChatRepository.findByUserUsername(username);
+        RequestLiveChat toUser = requestLiveChatRepository.findByToUserUsername(username);
+        if (user!=null && user.getUser().getStatus().contentEquals("online") && user.getToUser().getStatus().contentEquals("online")){
+            System.out.println("user if ");
+            return user;
+        }
+        else {
+            System.out.println("toUser if");
+            return toUser;
         }
     }
 
